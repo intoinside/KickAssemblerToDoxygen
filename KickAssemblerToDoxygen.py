@@ -18,136 +18,147 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-import glob, os
-import shutil
+"""Module providingFunction printing python version."""
 import sys
+import os
 import re
-import unittest
 from pathlib import Path
 
-def replaceBodyInCurlyBrackets(stringToElaborate):
-  newStringToElaborate = re.sub(r"(\{[^\{\}]*\})", r";", stringToElaborate)
-  while newStringToElaborate != stringToElaborate:
-    stringToElaborate = newStringToElaborate
-    newStringToElaborate = re.sub(r"(\{[^\{\}]*\})", r";", stringToElaborate)
+def replace_body_in_curly_brackets(string_to_elaborate):
+    """Function printing python version."""
+    new_string_to_elaborate = re.sub(r"(\{[^\{\}]*\})", r";", string_to_elaborate)
+    while new_string_to_elaborate != string_to_elaborate:
+        string_to_elaborate = new_string_to_elaborate
+        new_string_to_elaborate = re.sub(r"(\{[^\{\}]*\})", r";", string_to_elaborate)
 
-  return stringToElaborate
+    return string_to_elaborate
 
-def removeAssert(content):
-  # match .assert "macroName(x)", { macroName(1) }, { lda #1 }
-  content = re.sub(".assert [\.\|\"\w\(\)\,\s+\{\}\%\#\$\;\[\]]+\}", "", content)
+def remove_assert(content):
+    """Function printing python version."""
+    # match .assert "macroName(x)", { macroName(1) }, { lda #1 }
+    content = re.sub(r".assert [\.\|\"\w\(\)\,\s+\{\}\%\#\$\;\[\]]+\}", "", content)
 
-  # match .assert "macroName(x)", macroName(1), 1
-  content = re.sub(r"(.assert [^\,]+\,[^\,]+\,[^\n]+)", r"", content)
+    # match .assert "macroName(x)", macroName(1), 1
+    content = re.sub(r"(.assert [^\,]+\,[^\,]+\,[^\n]+)", r"", content)
 
-  return content
+    return content
 
-def removeAssertError(content):
-  # match .asserterror "macroName(x)", { macroName(1) }
-  content = re.sub(r"(.asserterror [^\,]+\,[^\}]+\})", r"", content)
+def remove_assert_error(content):
+    """Function printing python version."""
+    # match .asserterror "macroName(x)", { macroName(1) }
+    content = re.sub(r"(.asserterror [^\,]+\,[^\}]+\})", r"", content)
 
-  return content
+    return content
 
-def removeFileNameSpace(content):
-  # remove filenamespace
-  content = re.sub(".filenamespace [\w]*\n", "", content)
+def remove_filenamespace(content):
+    """Function printing python version."""
+    # remove filenamespace
+    content = re.sub(r".filenamespace [\w]*\n", "", content)
 
-  return content
+    return content
 
-def removeImportOnce(content):
-  # remove importonce
-  content = re.sub("#importonce[\w]*\n", "", content)
+def remove_importonce(content):
+    """Function printing python version."""
+    # remove importonce
+    content = re.sub(r"#importonce[\w]*\n", "", content)
 
-  return content
+    return content
 
-def removeImport(content):
-  # remove import
-  content = re.sub("#import[\w\"\\\/\.\s]*\n", "", content)
+def remove_import(content):
+    """Function printing python version."""
+    # remove import
+    content = re.sub(r"#import[\w\"\\\/\.\s]*\n", "", content)
 
-  return content
+    return content
 
-def removeInitalDotFromKeywords(content):
-  # convert keywords to be interpreted by doxygen
-  content = content.replace('.namespace ', 'namespace ')
-  content = content.replace('.macro ', 'macro ')
-  content = content.replace('.function ', 'function ')
-  content = content.replace('.label ', 'label ')
-  content = content.replace('.pseudocommand ', 'pseudocommand ')
+def remove_inital_dot_from_keywords(content):
+    """Function printing python version."""
+    # convert keywords to be interpreted by doxygen
+    content = content.replace('.namespace ', 'namespace ')
+    content = content.replace('.macro ', 'macro ')
+    content = content.replace('.function ', 'function ')
+    content = content.replace('.label ', 'label ')
+    content = content.replace('.pseudocommand ', 'pseudocommand ')
 
-  return content
+    return content
 
-def addSemicolorToLabelDeclaration(content):
-  # add semicolor at the end of label declaration
-  content = re.sub(r'(label[^\n]+)', r'\1;', content)
+def add_semicolor_to_label_declaration(content):
+    """Function printing python version."""
+    # add semicolor at the end of label declaration
+    content = re.sub(r'(label[^\n]+)', r'\1;', content)
 
-  return content
+    return content
 
-def convertFile(filename):
-  print("Processing " + filename)
-  head, tail = os.path.split(filename)
+def convert_file(filename):
+    """Function printing python version."""
+    print("Processing " + filename)
+    head, tail = os.path.split(filename)
 
-  outputFileName = head + '/output/' + tail
+    output_filename = head + '/output/' + tail
 
-  print("Reading...")
-  content = open(filename, 'r').read()
+    print("Reading...")
+    content = open(filename, 'r', encoding='utf8').read()
 
-  print("Editing...")
+    print("Editing...")
 
-  content = removeAssert(content)
+    content = remove_assert(content)
 
-  content = removeAssertError(content)
+    content = remove_assert_error(content)
 
-  content = removeFileNameSpace(content)
+    content = remove_filenamespace(content)
 
-  content = removeImportOnce(content)
+    content = remove_importonce(content)
 
-  content = removeImport(content)
+    content = remove_import(content)
 
-  # we need to clean macro/function body, but first check if there
-  # is a namespace (we don't have to clean namespace body)
-  namespaceIndex = content.find(".namespace ");
-  if (namespaceIndex != -1):
-    # there is a namespace, preserve it and clean any body inside it
-    namespaceIndex = content.find("{", namespaceIndex) + 1
-    contentInNamespace = content[namespaceIndex:]
+    # we need to clean macro/function body, but first check if there
+    # is a namespace (we don't have to clean namespace body)
+    namespace_index = content.find(".namespace ")
+    if namespace_index != -1:
+        # there is a namespace, preserve it and clean any body inside it
+        namespace_index = content.find("{", namespace_index) + 1
+        content_in_namespace = content[namespace_index:]
 
-    contentInNamespaceReplaced = replaceBodyInCurlyBrackets(contentInNamespace)
+        content_in_namespace_replaced = replace_body_in_curly_brackets(content_in_namespace)
 
-    content = content.replace(contentInNamespace, contentInNamespaceReplaced)
-  else:
-    # there is no namespace, clean all bodies
-    content = replaceBodyInCurlyBrackets(content)
+        content = content.replace(content_in_namespace, content_in_namespace_replaced)
+    else:
+        # there is no namespace, clean all bodies
+        content = replace_body_in_curly_brackets(content)
 
-  content = removeInitalDotFromKeywords(content)
+    content = remove_inital_dot_from_keywords(content)
 
-  # finish... save the new file
-  print("Saving " + outputFileName + "...")
-  f = open(outputFileName, 'w')
-  f.write(content)
-  f.close()
+    content = add_semicolor_to_label_declaration(content)
+
+    # finish... save the new file
+    print("Saving " + output_filename + "...")
+    out_file = open(output_filename, 'w', encoding='utf8')
+    out_file.write(content)
+    out_file.close()
 
 def usage():
-  print("Convert KickAssembler source code into C-like format")
-  print("readable from Doxygen.")
-  print("Converted files are not meant to contain valid source")
-  print("code.")
-  print("Output files will be automatically created in ")
-  print("\"output\" folder inside folder passed by argument.")
-  print()
-  print("Usage: " + sys.argv[0] + " <folder-name>")
-  print()
-  print("Example: " + sys.argv[0] + " .\\lib")
-  print("Remeber to use slash or backslash correctly.")
+    """Function printing python version."""
+    print("Convert KickAssembler source code into C-like format")
+    print("readable from Doxygen.")
+    print("Converted files are not meant to contain valid source")
+    print("code.")
+    print("Output files will be automatically created in ")
+    print("\"output\" folder inside folder passed by argument.")
+    print()
+    print("Usage: " + sys.argv[0] + " <folder-name>")
+    print()
+    print("Example: " + sys.argv[0] + " .\\lib")
+    print("Remeber to use slash or backslash correctly.")
 
-if (len(sys.argv) == 1):
-  print(usage())
+if len(sys.argv) == 1:
+    print(usage())
 else:
-  print("Using " + sys.argv[1] + " command line arguments")
-  head, tail = os.path.split(sys.argv[1])
-  if (os.path.isdir(head + '/output') == False):
-    print("Creating " + head + '/output')
-    os.makedirs(head + '/output', exist_ok=True)
+    print("Using " + sys.argv[1] + " command line arguments")
+    head_argument, tail_argument = os.path.split(sys.argv[1])
+    if os.path.isdir(head_argument + '/output') is False:
+        print("Creating " + head_argument + '/output')
+        os.makedirs(head_argument + '/output', exist_ok=True)
 
-  for file in Path(sys.argv[1]).glob("*.asm"):
-    if (os.path.isdir(file) == False):
-      convertFile(str(file))
+    for file in Path(sys.argv[1]).glob("*.asm"):
+        if os.path.isdir(file) is False:
+            convert_file(str(file))
