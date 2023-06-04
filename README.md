@@ -23,4 +23,4 @@ inside folder passed by argument.
 
 Remeber to use slash or backslash correctly.
 
-It should work with Python 3.10 and above.
+It works with Python 3.10 and (hopefully) above.
