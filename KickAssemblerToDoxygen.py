@@ -91,6 +91,13 @@ def add_semicolor_to_label_declaration(content):
 
     return content
 
+def remove_some_newline(content):
+    """Function printing python version."""
+    # content = content.replace("\n\n\n", "\n\n")
+    content = re.sub(r"[\n]{2,}\/\*\*", r"\n\n/**", content)
+
+    return content
+
 def read_file(filename):
     """Function printing python version."""
     print("Processing " + filename)
@@ -131,6 +138,8 @@ def convert_file(content):
     content = remove_inital_dot_from_keywords(content)
 
     content = add_semicolor_to_label_declaration(content)
+
+    content = remove_some_newline(content)
     return content
 
 def write_file(filename, content):

@@ -88,6 +88,21 @@ class TestClass(unittest.TestCase):
     expected = "label xyz = $beef;"
     self.assertEqual(add_semicolor_to_label_declaration(sourceCode), expected, "Should have semicolon at end")
 
+  def testRemoveSomeNewLine(self):
+    sourceCode = "\n\n\n/**"
+    expected = "\n\n/**"
+    self.assertEqual(remove_some_newline(sourceCode), expected, "Should have reduced newline")
+
+  def testRemoveSomeNewLine2(self):
+    sourceCode = "\n\n\n\n/**"
+    expected = "\n\n/**"
+    self.assertEqual(remove_some_newline(sourceCode), expected, "Should have reduced newline")
+
+  def testRemoveSomeNewLine2(self):
+    sourceCode = "\n/**"
+    expected = "\n/**"
+    self.assertEqual(remove_some_newline(sourceCode), expected, "Should have not reduced newline")
+
   def testReplaceBodyInCurlyBrackets(self):
     sourceCode = """.macro SetVICBank(bank) {
 lda Cia.CIA2_DATA_PORT_A
