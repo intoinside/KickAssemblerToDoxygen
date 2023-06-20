@@ -102,9 +102,8 @@ def read_file(filename):
     """Function printing python version."""
     print("Processing " + filename)
 
-    content = open(filename, 'r', encoding='utf8').read()
-
-    return content
+    with open(filename, 'r', encoding='utf8') as file_to_open:
+        return file_to_open.read()
 
 def convert_file(content):
     """Function printing python version."""
@@ -149,9 +148,9 @@ def write_file(filename, content):
     output_filename = head + '/output/' + tail
 
     print("Saving " + output_filename + "...")
-    out_file = open(output_filename, 'w', encoding='utf8')
-    out_file.write(content)
-    out_file.close()
+    with open(output_filename, 'w', encoding='utf8') as out_file:
+        out_file.write(content)
+        out_file.close()
 
 def usage():
     """Function printing python version."""
