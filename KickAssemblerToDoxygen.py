@@ -35,18 +35,20 @@ def replace_body_in_curly_brackets(string_to_elaborate):
 
 def remove_assert(content):
     """Function printing python version."""
-    # match .assert "macroName(x)", { macroName(1) }, { lda #1 }
-    content = re.sub(r".assert [\.\|\"\w\(\)\,\s+\{\}\%\#\$\;\[\]]+\}", "", content)
+    # match .assert "macroName(x)", macroName(1), lda #0
+    # on single line without curly braces
+    content = re.sub(r".assert (?:(?!}).)*?(?=\n|$)", r"", content)
 
-    # match .assert "macroName(x)", macroName(1), 1
-    content = re.sub(r"(.assert [^\,]+\,[^\,]+\,[^\n]+)", r"", content)
+    # match .assert "macroName(x)", { macroName(1) }, { lda #0 }
+    # on single or multiple line with curly braces
+    content = re.sub(r".assert [^\}]+\}[^\}]+\}", r"", content)
 
     return content
 
 def remove_assert_error(content):
     """Function printing python version."""
     # match .asserterror "macroName(x)", { macroName(1) }
-    content = re.sub(r"(.asserterror [^\,]+\,[^\}]+\})", r"", content)
+    content = re.sub(r".asserterror [^\}]+\}", r"", content)
 
     return content
 
