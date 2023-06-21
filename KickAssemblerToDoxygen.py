@@ -69,7 +69,7 @@ def remove_importonce(content):
 def remove_import(content):
     """Function printing python version."""
     # remove import
-    content = re.sub(r"#import[\w\"\\\/\.\s]*\n", "", content)
+    content = re.sub(r"#import[^\"]+\"[^\"]+\"\n", "", content)
 
     return content
 
