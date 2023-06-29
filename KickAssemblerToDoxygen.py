@@ -35,13 +35,13 @@ def replace_body_in_curly_brackets(string_to_elaborate):
 
 def remove_assert(content):
     """Function printing python version."""
+    # match .assert "macroName(x)", macroName(1), lda #0
+    # on single line without curly braces
+    content = re.sub(r".assert [^{}]*(?=\n|$)", r"", content)
+
     # match .assert "macroName(x)", { macroName(1) }, { lda #0 }
     # on single or multiple line with curly braces
     content = re.sub(r".assert [^\}]+\}[^\}]+\}", r"", content)
-
-    # match .assert "macroName(x)", macroName(1), lda #0
-    # on single line without curly braces
-    content = re.sub(r".assert (?:(?!}).)*?(?=\n|$)", r"", content)
 
     return content
 
@@ -84,16 +84,15 @@ def remove_inital_dot_from_keywords(content):
 
     return content
 
-def add_semicolor_to_label_declaration(content):
+def add_semicolon_to_label_declaration(content):
     """Function printing python version."""
-    # add semicolor at the end of label declaration
+    # add semicolon at the end of label declaration
     content = re.sub(r'(label[^\n]+)', r'\1;', content)
 
     return content
 
 def remove_some_newline(content):
     """Function printing python version."""
-    # content = content.replace("\n\n\n", "\n\n")
     content = re.sub(r"[\n]{2,}\/\*\*", r"\n\n/**", content)
 
     return content
@@ -136,7 +135,7 @@ def convert_file(content):
 
     content = remove_inital_dot_from_keywords(content)
 
-    content = add_semicolor_to_label_declaration(content)
+    content = add_semicolon_to_label_declaration(content)
 
     content = remove_some_newline(content)
     return content
