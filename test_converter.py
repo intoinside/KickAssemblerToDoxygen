@@ -138,219 +138,189 @@ sta Cia.CIA2_DATA_PORT_A
     expected = ".macro SetBankConfiguration(id) ;"
     self.assertEqual(replace_body_in_curly_brackets(sourceCode), expected, "Should leave only macro definition")
 
-#   def testFullFile(self):
-#     sourceCode = """/*
-#  * c128lib - 8502
-#  *
-#  * References available at
-#  * https://www.cubic.org/~doj/c64/mapping128.pdf
-#  */
-# #importonce
+  def testFullFile(self):
+    sourceCode = """/**
+  @file vdc.asm
+  @brief Vdc module
 
-# .filenamespace c128lib
+  @copyright MIT Licensed
+  @date 2022
+*/
+#importonce
 
-# .namespace Mos8502 {
+.filenamespace c128lib
+
+.namespace Vdc {
   
-# /*
-#   MOS8502 Registers
-# */
-# .label MOS_8502_DIRECTION       = $00
-# .label MOS_8502_IO              = $01
+/** Vdc color black */
+.label VDC_BLACK = 0
+/** Vdc color dark gray */
+.label VDC_DARK_GRAY = 1
+/** Vdc color dark blue */
+.label VDC_DARK_BLUE = 2
 
-# /*
-#   I/O Register bits.
-# */
-# .label CASETTE_MOTOR_OFF        = %00100000
-# .label CASETTE_SWITCH_CLOSED    = %00010000
-# .label CASETTE_DATA             = %00001000
-# .label PLA_CHAREN               = %00000100
-# .label PLA_HIRAM                = %00000010
-# .label PLA_LORAM                = %00000001
+}
 
-# /*
-#   Possible I/O & PLA configurations.
-# */
-# .label RAM_RAM_RAM              = %000
-# .label RAM_CHAR_RAM             = PLA_LORAM
-# .label RAM_CHAR_KERNAL          = PLA_HIRAM
-# .label BASIC_CHAR_KERNAL        = PLA_LORAM | PLA_HIRAM
-# .label RAM_IO_RAM               = PLA_CHAREN | PLA_LORAM
-# .label RAM_IO_KERNAL            = PLA_CHAREN | PLA_HIRAM
-# .label BASIC_IO_KERNAL          = PLA_CHAREN | PLA_LORAM | PLA_HIRAM
+/**
+  Sets X position of given sprite (uses sprite MSB register if necessary)
 
-# }
+  @param[in] spriteNo Number of the sprite to move
+  @param[in] x X position of sprite
 
-# .macro configureMemory(config) {
-#     lda Mos8502.MOS_8502_IO
-#     and #%11111000
-#     ora #[config & %00000111]
-#     sta Mos8502.MOS_8502_IO
-# }
+  @note Use c128lib_SetSpriteXPosition in sprites-global.asm
 
-# /*
-#   Disable NMI by pointing NMI vector to rti
-# */
-# .macro disableNMI() {
-#     lda #<nmi
-#     sta c128lib.NMI_LO
-#     lda #>nmi
-#     sta c128lib.NMI_HI
-#     jmp end
-#   nmi: 
-#     rti
-#   end:
-# }
-# """
-#     expected = """/*
-#  * c128lib - 8502
-#  *
-#  * References available at
-#  * https://www.cubic.org/~doj/c64/mapping128.pdf
-#  */
+  @remark Register .A will be modified.
+  Flags N and Z will be affected.
+
+  @since 0.6.0
+*/
+.macro SetSpriteXPosition(spriteNo, x) {
+  .errorif (spriteNo < 0 || spriteNo > 7), "spriteNo must be from 0 to 7"
+  .if (x > 255) {
+    lda #<x
+    sta spriteXReg(spriteNo)
+    lda Vic2.SPRITE_MSB_X
+    ora #spriteMask(spriteNo)
+    sta Vic2.SPRITE_MSB_X
+  } else {
+    lda #x
+    sta spriteXReg(spriteNo)
+  }
+}
+.asserterror "SetSpriteXPosition(-1, 10)", { SetSpriteXPosition(-1, 10) }
+.asserterror "SetSpriteXPosition(8, 10)", { SetSpriteXPosition(8, 10) }
+.assert "SetSpriteXPosition stores X in SPRITE_X reg", { SetSpriteXPosition(3, 5) }, {
+  lda #$05
+  sta $d006
+}
+.assert "SetSpriteXPosition stores X in SPRITE_X and MSB regs", { SetSpriteXPosition(3, 257) },  {
+  lda #$01
+  sta $d006
+  lda $d010
+  ora #%00001000
+  sta $d010
+}
+"""
+    expected = """/**
+  @file vdc.asm
+  @brief Vdc module
+
+  @copyright MIT Licensed
+  @date 2022
+*/
 
 
-# namespace Mos8502 {
+namespace Vdc {
   
-# /*
-#   MOS8502 Registers
-# */
-# label MOS_8502_DIRECTION       = $00;
-# label MOS_8502_IO              = $01;
+/** Vdc color black */
+label VDC_BLACK = 0;
+/** Vdc color dark gray */
+label VDC_DARK_GRAY = 1;
+/** Vdc color dark blue */
+label VDC_DARK_BLUE = 2;
 
-# /*
-#   I/O Register bits.
-# */
-# label CASETTE_MOTOR_OFF        = %00100000;
-# label CASETTE_SWITCH_CLOSED    = %00010000;
-# label CASETTE_DATA             = %00001000;
-# label PLA_CHAREN               = %00000100;
-# label PLA_HIRAM                = %00000010;
-# label PLA_LORAM                = %00000001;
+}
 
-# /*
-#   Possible I/O & PLA configurations.
-# */
-# label RAM_RAM_RAM              = %000;
-# label RAM_CHAR_RAM             = PLA_LORAM;
-# label RAM_CHAR_KERNAL          = PLA_HIRAM;
-# label BASIC_CHAR_KERNAL        = PLA_LORAM | PLA_HIRAM;
-# label RAM_IO_RAM               = PLA_CHAREN | PLA_LORAM;
-# label RAM_IO_KERNAL            = PLA_CHAREN | PLA_HIRAM;
-# label BASIC_IO_KERNAL          = PLA_CHAREN | PLA_LORAM | PLA_HIRAM;
+/**
+  Sets X position of given sprite (uses sprite MSB register if necessary)
 
-# }
+  @param[in] spriteNo Number of the sprite to move
+  @param[in] x X position of sprite
 
-# macro configureMemory(config) ;
+  @note Use c128lib_SetSpriteXPosition in sprites-global.asm
 
-# /*
-#   Disable NMI by pointing NMI vector to rti
-# */
-# macro disableNMI() ;
-# """
-#     self.assertEqual(convert_file(sourceCode), expected, "Should clean everything")
+  @remark Register .A will be modified.
+  Flags N and Z will be affected.
 
-#   def testFullFileWithoutNamespace(self):
-#     sourceCode = """/*
-#  * c128lib - 8502
-#  *
-#  * References available at
-#  * https://www.cubic.org/~doj/c64/mapping128.pdf
-#  */
-# #importonce
-
-# .filenamespace c128lib
-
-# /*
-#   MOS8502 Registers
-# */
-# .label MOS_8502_DIRECTION       = $00
-# .label MOS_8502_IO              = $01
-
-# /*
-#   I/O Register bits.
-# */
-# .label CASETTE_MOTOR_OFF        = %00100000
-# .label CASETTE_SWITCH_CLOSED    = %00010000
-# .label CASETTE_DATA             = %00001000
-# .label PLA_CHAREN               = %00000100
-# .label PLA_HIRAM                = %00000010
-# .label PLA_LORAM                = %00000001
-
-# /*
-#   Possible I/O & PLA configurations.
-# */
-# .label RAM_RAM_RAM              = %000
-# .label RAM_CHAR_RAM             = PLA_LORAM
-# .label RAM_CHAR_KERNAL          = PLA_HIRAM
-# .label BASIC_CHAR_KERNAL        = PLA_LORAM | PLA_HIRAM
-# .label RAM_IO_RAM               = PLA_CHAREN | PLA_LORAM
-# .label RAM_IO_KERNAL            = PLA_CHAREN | PLA_HIRAM
-# .label BASIC_IO_KERNAL          = PLA_CHAREN | PLA_LORAM | PLA_HIRAM
-
-# .macro configureMemory(config) {
-#     lda Mos8502.MOS_8502_IO
-#     and #%11111000
-#     ora #[config & %00000111]
-#     sta Mos8502.MOS_8502_IO
-# }
-
-# /*
-#   Disable NMI by pointing NMI vector to rti
-# */
-# .macro disableNMI() {
-#     lda #<nmi
-#     sta c128lib.NMI_LO
-#     lda #>nmi
-#     sta c128lib.NMI_HI
-#     jmp end
-#   nmi: 
-#     rti
-#   end:
-# }
-# """
-#     expected = """/*
-#  * c128lib - 8502
-#  *
-#  * References available at
-#  * https://www.cubic.org/~doj/c64/mapping128.pdf
-#  */
+  @since 0.6.0
+*/
+macro SetSpriteXPosition(spriteNo, x) ;
 
 
-# /*
-#   MOS8502 Registers
-# */
-# label MOS_8502_DIRECTION       = $00;
-# label MOS_8502_IO              = $01;
 
-# /*
-#   I/O Register bits.
-# */
-# label CASETTE_MOTOR_OFF        = %00100000;
-# label CASETTE_SWITCH_CLOSED    = %00010000;
-# label CASETTE_DATA             = %00001000;
-# label PLA_CHAREN               = %00000100;
-# label PLA_HIRAM                = %00000010;
-# label PLA_LORAM                = %00000001;
 
-# /*
-#   Possible I/O & PLA configurations.
-# */
-# label RAM_RAM_RAM              = %000;
-# label RAM_CHAR_RAM             = PLA_LORAM;
-# label RAM_CHAR_KERNAL          = PLA_HIRAM;
-# label BASIC_CHAR_KERNAL        = PLA_LORAM | PLA_HIRAM;
-# label RAM_IO_RAM               = PLA_CHAREN | PLA_LORAM;
-# label RAM_IO_KERNAL            = PLA_CHAREN | PLA_HIRAM;
-# label BASIC_IO_KERNAL          = PLA_CHAREN | PLA_LORAM | PLA_HIRAM;
+"""
+    self.assertEqual(convert_file(sourceCode), expected, "Should clean everything")
 
-# macro configureMemory(config) ;
+  def testFullFileWithoutNamespace(self):
+    sourceCode = """/**
+  @file vdc.asm
+  @brief Vdc module
 
-# /*
-#   Disable NMI by pointing NMI vector to rti
-# */
-# macro disableNMI() ;
-# """
-#     self.assertEqual(convert_file(sourceCode), expected, "Should clean everything")
+  @copyright MIT Licensed
+  @date 2022
+*/
+#importonce
+
+.filenamespace c128lib
+
+/**
+  Sets X position of given sprite (uses sprite MSB register if necessary)
+
+  @param[in] spriteNo Number of the sprite to move
+  @param[in] x X position of sprite
+
+  @note Use c128lib_SetSpriteXPosition in sprites-global.asm
+
+  @remark Register .A will be modified.
+  Flags N and Z will be affected.
+
+  @since 0.6.0
+*/
+.macro SetSpriteXPosition(spriteNo, x) {
+  .errorif (spriteNo < 0 || spriteNo > 7), "spriteNo must be from 0 to 7"
+  .if (x > 255) {
+    lda #<x
+    sta spriteXReg(spriteNo)
+    lda Vic2.SPRITE_MSB_X
+    ora #spriteMask(spriteNo)
+    sta Vic2.SPRITE_MSB_X
+  } else {
+    lda #x
+    sta spriteXReg(spriteNo)
+  }
+}
+.asserterror "SetSpriteXPosition(-1, 10)", { SetSpriteXPosition(-1, 10) }
+.asserterror "SetSpriteXPosition(8, 10)", { SetSpriteXPosition(8, 10) }
+.assert "SetSpriteXPosition stores X in SPRITE_X reg", { SetSpriteXPosition(3, 5) }, {
+  lda #$05
+  sta $d006
+}
+.assert "SetSpriteXPosition stores X in SPRITE_X and MSB regs", { SetSpriteXPosition(3, 257) },  {
+  lda #$01
+  sta $d006
+  lda $d010
+  ora #%00001000
+  sta $d010
+}
+"""
+    expected = """/**
+  @file vdc.asm
+  @brief Vdc module
+
+  @copyright MIT Licensed
+  @date 2022
+*/
+
+/**
+  Sets X position of given sprite (uses sprite MSB register if necessary)
+
+  @param[in] spriteNo Number of the sprite to move
+  @param[in] x X position of sprite
+
+  @note Use c128lib_SetSpriteXPosition in sprites-global.asm
+
+  @remark Register .A will be modified.
+  Flags N and Z will be affected.
+
+  @since 0.6.0
+*/
+macro SetSpriteXPosition(spriteNo, x) ;
+
+
+
+"""
+    self.assertEqual(convert_file(sourceCode), expected, "Should clean everything")
 
   def testUsage(self):
     try:
