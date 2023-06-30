@@ -24,3 +24,18 @@ inside folder passed by argument.
 Remeber to use slash or backslash correctly.
 
 It works with Python 3.10 and (hopefully) above.
+
+## Statements supported
+
+This script removes:
+* .assert
+* .asserterror
+* .filenamespace
+* .importonve
+* .import
+
+After removing all these stuff, it removes all body between curly brackets.
+
+Next step is to remove initia dot from keywords and then add a semicolon at the end of every label declaration.
+
+This sequence is repeated for every file specificated as argument and edited file are saved in output folder.
