@@ -31,11 +31,11 @@ This script removes:
 * .assert
 * .asserterror
 * .filenamespace
-* .importonve
+* .importonce
 * .import
 
-After removing all these stuff, it removes all body between curly brackets.
+After removing all these stuff, it removes all bodies between curly brackets.
 
-Next step is to remove initia dot from keywords and then add a semicolon at the end of every label declaration.
+Next step is to remove initial dot from keywords and then add a semicolon at the end of every label declaration.
 
 This sequence is repeated for every file specificated as argument and edited file are saved in output folder.
