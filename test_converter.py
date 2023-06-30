@@ -319,6 +319,7 @@ macro SetSpriteXPosition(spriteNo, x) ;
 
 
 
+
 """
     self.assertEqual(convert_file(sourceCode), expected, "Should clean everything")
 
