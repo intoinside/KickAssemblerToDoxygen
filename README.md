@@ -34,7 +34,7 @@ This script removes:
 * .importonce
 * .import
 
-After removing all these stuff, it removes all bodies between curly brackets.
+After removing all these stuff, it fixes struct declaration.
 
 Next step is to remove initial dot from keywords and then add a semicolon at the end of every label declaration.
 
