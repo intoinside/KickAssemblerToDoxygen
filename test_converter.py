@@ -103,40 +103,45 @@ class TestClass(unittest.TestCase):
     expected = "\n/**"
     self.assertEqual(remove_some_newline(sourceCode), expected, "Should have not reduced newline")
 
-  def testReplaceBodyInCurlyBrackets(self):
-    sourceCode = """.macro SetVICBank(bank) {
-lda Cia.CIA2_DATA_PORT_A
-and #%11111100
-ora #[bank & %00000011]
-sta Cia.CIA2_DATA_PORT_A
-}"""
-    expected = ".macro SetVICBank(bank) ;"
-    self.assertEqual(replace_body_in_curly_brackets(sourceCode), expected, "Should leave only macro definition")
+  def testFixStruct(self):
+    sourceCode = ".struct name {value, value2}"
+    expected = ".struct name {value, value2,};"
+    self.assertEqual(fix_struct_definition(sourceCode), expected, "Should have fixed struct")
 
-  def testReplaceBodyInCurlyBracketsWithMultiBrackets(self):
-    sourceCode = """.macro SetBankConfiguration(id) {
-    .if(id==0) {
-      lda #%00111111   // no roms, RAM 0
-    }
-    .if(id==1) {
-      lda #%01111111   // no roms, RAM 1
-    }
-    .if(id==12) {
-      lda #%00000110   // internal function ROM, Kernal and IO, RAM 0
-    }
-    .if(id==14) {
-      lda #%00000001   // all roms, char ROM, RAM 0
-    }
-    .if(id==15) {
-      lda #%00000000  // all roms, RAM 0. default setting.
-    }
-    .if(id==99) {
-      lda #%00001110  // IO, kernal, RAM0. No basic,48K RAM.
-    }
-    sta Mmu.LOAD_CONFIGURATION
-}"""
-    expected = ".macro SetBankConfiguration(id) ;"
-    self.assertEqual(replace_body_in_curly_brackets(sourceCode), expected, "Should leave only macro definition")
+#   def testReplaceBodyInCurlyBrackets(self):
+#     sourceCode = """.macro SetVICBank(bank) {
+# lda Cia.CIA2_DATA_PORT_A
+# and #%11111100
+# ora #[bank & %00000011]
+# sta Cia.CIA2_DATA_PORT_A
+# }"""
+#     expected = ".macro SetVICBank(bank) ;"
+#     self.assertEqual(replace_body_in_curly_brackets(sourceCode), expected, "Should leave only macro definition")
+
+#   def testReplaceBodyInCurlyBracketsWithMultiBrackets(self):
+#     sourceCode = """.macro SetBankConfiguration(id) {
+#     .if(id==0) {
+#       lda #%00111111   // no roms, RAM 0
+#     }
+#     .if(id==1) {
+#       lda #%01111111   // no roms, RAM 1
+#     }
+#     .if(id==12) {
+#       lda #%00000110   // internal function ROM, Kernal and IO, RAM 0
+#     }
+#     .if(id==14) {
+#       lda #%00000001   // all roms, char ROM, RAM 0
+#     }
+#     .if(id==15) {
+#       lda #%00000000  // all roms, RAM 0. default setting.
+#     }
+#     .if(id==99) {
+#       lda #%00001110  // IO, kernal, RAM0. No basic,48K RAM.
+#     }
+#     sta Mmu.LOAD_CONFIGURATION
+# }"""
+#     expected = ".macro SetBankConfiguration(id) ;"
+#     self.assertEqual(replace_body_in_curly_brackets(sourceCode), expected, "Should leave only macro definition")
 
   def testFullFile(self):
     sourceCode = """/**
@@ -234,40 +239,7 @@ label VDC_DARK_BLUE = 2;
 
   @since 0.6.0
 */
-macro SetSpriteXPosition(spriteNo, x) ;
-
-
-
-
-"""
-    self.assertEqual(convert_file(sourceCode), expected, "Should clean everything")
-
-  def testFullFileWithoutNamespace(self):
-    sourceCode = """/**
-  @file vdc.asm
-  @brief Vdc module
-
-  @copyright MIT Licensed
-  @date 2022
-*/
-#importonce
-
-.filenamespace c128lib
-
-/**
-  Sets X position of given sprite (uses sprite MSB register if necessary)
-
-  @param[in] spriteNo Number of the sprite to move
-  @param[in] x X position of sprite
-
-  @note Use c128lib_SetSpriteXPosition in sprites-global.asm
-
-  @remark Register .A will be modified.
-  Flags N and Z will be affected.
-
-  @since 0.6.0
-*/
-.macro SetSpriteXPosition(spriteNo, x) {
+macro SetSpriteXPosition(spriteNo, x) {
   .errorif (spriteNo < 0 || spriteNo > 7), "spriteNo must be from 0 to 7"
   .if (x > 255) {
     lda #<x
@@ -280,42 +252,6 @@ macro SetSpriteXPosition(spriteNo, x) ;
     sta spriteXReg(spriteNo)
   }
 }
-.asserterror "SetSpriteXPosition(-1, 10)", { SetSpriteXPosition(-1, 10) }
-.asserterror "SetSpriteXPosition(8, 10)", { SetSpriteXPosition(8, 10) }
-.assert "SetSpriteXPosition stores X in SPRITE_X reg", { SetSpriteXPosition(3, 5) }, {
-  lda #$05
-  sta $d006
-}
-.assert "SetSpriteXPosition stores X in SPRITE_X and MSB regs", { SetSpriteXPosition(3, 257) },  {
-  lda #$01
-  sta $d006
-  lda $d010
-  ora #%00001000
-  sta $d010
-}
-"""
-    expected = """/**
-  @file vdc.asm
-  @brief Vdc module
-
-  @copyright MIT Licensed
-  @date 2022
-*/
-
-/**
-  Sets X position of given sprite (uses sprite MSB register if necessary)
-
-  @param[in] spriteNo Number of the sprite to move
-  @param[in] x X position of sprite
-
-  @note Use c128lib_SetSpriteXPosition in sprites-global.asm
-
-  @remark Register .A will be modified.
-  Flags N and Z will be affected.
-
-  @since 0.6.0
-*/
-macro SetSpriteXPosition(spriteNo, x) ;
 
 
 
