@@ -98,6 +98,12 @@ def remove_some_newline(content):
 
     return content
 
+def check_folder(path_to_folder):
+    """Function printing python version."""
+    if os.path.isdir(path_to_folder) is False:
+        print("Creating " + path_to_folder)
+        os.makedirs(path_to_folder, exist_ok=True)
+
 def read_file(filename):
     """Function printing python version."""
     print("Processing " + filename)
@@ -130,12 +136,8 @@ def convert_file(content):
 
 def write_file(filename, content):
     """Function printing python version."""
-    head, tail = os.path.split(filename)
-
-    output_filename = head + '/output/' + tail
-
-    print("Saving " + output_filename + "...")
-    with open(output_filename, 'w', encoding='utf8') as out_file:
+    print("Saving " + filename + "...")
+    with open(filename, 'w', encoding='utf8') as out_file:
         out_file.write(content)
         out_file.close()
 
@@ -157,13 +159,18 @@ if len(sys.argv) == 1:
     print(usage())
 else:
     print("Using " + sys.argv[1] + " command line arguments")
-    head_argument, tail_argument = os.path.split(sys.argv[1])
-    if os.path.isdir(head_argument + '/output') is False:
-        print("Creating " + head_argument + '/output')
-        os.makedirs(head_argument + '/output', exist_ok=True)
+    src_path = os.path.abspath(sys.argv[1])
+    head_argument, tail_argument = os.path.split(src_path)
+    out_path = head_argument + '/output'
+    check_folder(out_path)
 
-    for file in Path(sys.argv[1]).glob("*.asm"):
+    for file in Path(src_path).rglob("*.asm"):
+        relative_path = os.path.relpath(file, src_path)
+        output_file = out_path + "/" + relative_path
         if os.path.isdir(file) is False:
+            output_file_path = os.path.split(output_file)[0]
+            check_folder(output_file_path)
+
             content_to_elaborate = read_file(str(file))
             content_to_elaborate = convert_file(content_to_elaborate)
-            write_file(str(file), content_to_elaborate)
+            write_file(output_file, content_to_elaborate)
