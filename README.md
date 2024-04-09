@@ -12,6 +12,13 @@ Converted files are not meant to contain valid source code.
 This script is not perfect and suits well for most of the 
 KickAssembler source code. Feel free to improve it.
 
+## Working project
+
+This script is used in many repository derived from
+[c128lib project](https://github.com/c128lib/).
+A working documentation can be found on
+[framework repository](https://c128lib.github.io/framework/).
+
 ## How it works
 
 Usage: python KickAssemblerToDoxygen.py &lt;folder-name&gt;
