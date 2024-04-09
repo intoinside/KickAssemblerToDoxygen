@@ -36,6 +36,6 @@ This script removes:
 
 After removing all these stuff, it fixes struct declaration.
 
-Next step is to remove initial dot from keywords and then add a semicolon at the end of every label declaration.
+Next step is to remove initial dot from keywords and then add a semicolon at the end of every label and const declaration.
 
 This sequence is repeated for every file specificated as argument and edited file are saved in output folder.
