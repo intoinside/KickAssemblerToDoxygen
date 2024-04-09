@@ -78,6 +78,11 @@ class TestClass(unittest.TestCase):
     expected = "label "
     self.assertEqual(remove_inital_dot_from_keywords(sourceCode), expected, "Should not have initial dot")
 
+  def testremoveInitalDotFromKeywordsConst(self):
+    sourceCode = ".const "
+    expected = "const "
+    self.assertEqual(remove_inital_dot_from_keywords(sourceCode), expected, "Should not have initial dot")
+
   def testremoveInitalDotFromKeywordsPseudocommand(self):
     sourceCode = ".pseudocommand "
     expected = "pseudocommand "
@@ -87,6 +92,11 @@ class TestClass(unittest.TestCase):
     sourceCode = "label xyz = $beef"
     expected = "label xyz = $beef;"
     self.assertEqual(add_semicolon_to_label_declaration(sourceCode), expected, "Should have semicolon at end")
+
+  def testAddSemicolonToConst(self):
+    sourceCode = "const xyz = $beef"
+    expected = "const xyz = $beef;"
+    self.assertEqual(add_semicolon_to_const_declaration(sourceCode), expected, "Should have semicolon at end")
 
   def testRemoveSomeNewLine(self):
     sourceCode = "\n\n\n/**"

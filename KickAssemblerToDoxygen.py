@@ -71,6 +71,7 @@ def remove_inital_dot_from_keywords(content):
     content = content.replace('.macro ', 'macro ')
     content = content.replace('.function ', 'function ')
     content = content.replace('.label ', 'label ')
+    content = content.replace('.const ', 'const ')
     content = content.replace('.pseudocommand ', 'pseudocommand ')
     content = content.replace('.struct ', 'struct ')
 
@@ -89,6 +90,13 @@ def add_semicolon_to_label_declaration(content):
     """Function printing python version."""
     # add semicolon at the end of label declaration
     content = re.sub(r'(label[^\n\,]+)', r'\1;', content)
+
+    return content
+
+def add_semicolon_to_const_declaration(content):
+    """Function printing python version."""
+    # add semicolon at the end of const declaration
+    content = re.sub(r'(const[^\n\,]+)', r'\1;', content)
 
     return content
 
@@ -130,6 +138,8 @@ def convert_file(content):
     content = remove_inital_dot_from_keywords(content)
 
     content = add_semicolon_to_label_declaration(content)
+    
+    content = add_semicolon_to_const_declaration(content)
 
     content = remove_some_newline(content)
     return content
