@@ -26,7 +26,7 @@ Usage: python KickAssemblerToDoxygen.py &lt;folder-name&gt;
 Example: python KickAssemblerToDoxygen.py .\\lib
 
 Output file will be automatically created in "output" folder
-inside folder passed by argument.
+beside folder passed by argument.
 
 Remeber to use slash or backslash correctly.
 
@@ -46,3 +46,11 @@ After removing all these stuff, it fixes struct declaration.
 Next step is to remove initial dot from keywords and then add a semicolon at the end of every label and const declaration.
 
 This sequence is repeated for every file specificated as argument and edited file are saved in output folder.
+
+### Breaking change on v1.6
+Starting from v1.6, output folder will not be a subfolder of argument but it will be 
+created beside argument folder.
+
+## Automation with Github
+This plugin can be used with Github Actions, Doxygen and Github Pages. Look at
+[this](https://github.com/c128lib/base/blob/master/.github/workflows/main.yml) yml file.

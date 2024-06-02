@@ -158,7 +158,7 @@ def usage():
     print("Converted files are not meant to contain valid source")
     print("code.")
     print("Output files will be automatically created in ")
-    print("\"output\" folder inside folder passed by argument.")
+    print("\"output\" beside folder passed by argument.")
     print()
     print("Usage: " + sys.argv[0] + " <folder-name>")
     print()
@@ -170,9 +170,13 @@ if len(sys.argv) == 1:
 else:
     print("Using " + sys.argv[1] + " command line arguments")
     src_path = os.path.abspath(sys.argv[1])
-    head_argument, tail_argument = os.path.split(src_path)
-    out_path = head_argument + '/output'
+    if src_path[-1] != '/':
+        src_path += '/'
+
+    out_path = src_path + "../output"
     check_folder(out_path)
+
+    print("Output path: " + out_path)
 
     for file in Path(src_path).rglob("*.asm"):
         relative_path = os.path.relpath(file, src_path)
